@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { Observable, EMPTY, combineLatest, Subscription } from 'rxjs';
@@ -13,13 +13,14 @@ import { FavouriteService } from '../favourite.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
 
   title: string = 'Products';
   selectedProduct: Product;
-  favouriteAdded: Product;
+  favouriteAdded$: Observable<Product>;
   errorMessage;
   filter: FormControl = new FormControl("");
+  subscription: Subscription = new Subscription();
 
   // Pagination
   pageSize = 5;
@@ -62,17 +63,21 @@ export class ProductListComponent implements OnInit {
     private router: Router) {
   }
 
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.favouriteService
-        .favouriteAdded$
-        .pipe(
-          tap(console.log)
-        )
-        .subscribe(
-          product => this.favouriteAdded = product
-        );
+    this.favouriteAdded$ = this.favouriteService.favouriteAdded$;
+                            //.pipe(
+                             // filter(product => product != null),
+                             // tap(product => console.log("New favourite! " + product.name))
+                            //)
+                            // .subscribe(
+                            //   product => this.favouriteAdded = product
+                            // ));
   }
 
   refresh() {
@@ -84,7 +89,7 @@ export class ProductListComponent implements OnInit {
     .productService
     .products$
     .pipe(
-      //tap(products => this.productsNb = products.length)
+     // tap(products => { this.productsNb = products.length; })
     );
 
   filter$ = this

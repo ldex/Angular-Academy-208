@@ -18,6 +18,7 @@ export class FavouriteService {
   addToFavourites(product: Product) {
     this.favourites.add(product);
     this.favouriteAdded.next(product);
+    setTimeout(() => this.favouriteAdded.next(null), 2000);
   }
 
   getFavouritesNb(): number {
