@@ -10,10 +10,14 @@ export class FavouriteService {
 
   constructor() { }
 
+  private favouriteAdded = new BehaviorSubject<Product>(null);
+  favouriteAdded$: Observable<Product> = this.favouriteAdded.asObservable();
+
   private favourites: Set<Product> = new Set();
 
   addToFavourites(product: Product) {
     this.favourites.add(product);
+    this.favouriteAdded.next(product);
   }
 
   getFavouritesNb(): number {
